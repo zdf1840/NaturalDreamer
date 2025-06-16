@@ -12,6 +12,14 @@ import pandas as pd
 import plotly.graph_objects as pgo
 
 
+def symlog(x: torch.Tensor) -> torch.Tensor:
+    return torch.sign(x) * torch.log1p(torch.abs(x))
+
+
+def symexp(x: torch.Tensor) -> torch.Tensor:
+    return torch.sign(x) * (torch.exp(torch.abs(x)) - 1)
+
+
 def seedEverything(seed):
     random.seed(seed)
     np.random.seed(seed)
