@@ -40,7 +40,6 @@ Note: The code is being developed on Linux, and out of the box it works on Linux
 
 ## TODO
 
-- TwoHot loss isn't implemented yet with rewardModel and critic. I made an attempt and wrote neat code for it, but it didn't work and I'm out of ideas on how to proceed, so that's yet to be finished. For now, rewardModel and critic use normal distribution.
 - Discrete actions. That will be easy, just a few lines of code when I'll start solving more environments.
 - Add vector observations encoder and decoder.
 - Reconstruction loss is huge (11k), messing up graphs' axis scale. But graphs are only for debugging, so it's not a priority.
