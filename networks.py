@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.distributions import Normal, Bernoulli, Independent, OneHotCategoricalStraightThrough
 from torch.distributions.utils import probs_to_logits
 from utils import sequentialModel1D
+from distributions import TwoHotEncodingDistribution
 
 
 class RecurrentModel(nn.Module):
@@ -62,14 +63,20 @@ class PosteriorNet(nn.Module):
 
 
 class RewardModel(nn.Module):
-    def __init__(self, inputSize, config):
+    def __init__(self, inputSize, config, bins: int = 601):
         super().__init__()
         self.config = config
-        self.network = sequentialModel1D(inputSize, [self.config.hiddenSize]*self.config.numLayers, 2, self.config.activation)
+        self.bins = bins
+        self.network = sequentialModel1D(
+            inputSize,
+            [self.config.hiddenSize] * self.config.numLayers,
+            self.bins,
+            self.config.activation,
+        )
 
     def forward(self, x):
-        mean, logStd = self.network(x).chunk(2, dim=-1)
-        return Normal(mean.squeeze(-1), torch.exp(logStd).squeeze(-1))
+        logits = self.network(x)
+        return TwoHotEncodingDistribution(logits, dims=1)
 
 
 class ContinueModel(nn.Module):
@@ -151,11 +158,17 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    def __init__(self, inputSize, config):
+    def __init__(self, inputSize, config, bins: int = 601):
         super().__init__()
         self.config = config
-        self.network = sequentialModel1D(inputSize, [self.config.hiddenSize]*self.config.numLayers, 2, self.config.activation)
+        self.bins = bins
+        self.network = sequentialModel1D(
+            inputSize,
+            [self.config.hiddenSize] * self.config.numLayers,
+            self.bins,
+            self.config.activation,
+        )
 
     def forward(self, x):
-        mean, logStd = self.network(x).chunk(2, dim=-1)
-        return Normal(mean.squeeze(-1), torch.exp(logStd).squeeze(-1))
+        logits = self.network(x)
+        return TwoHotEncodingDistribution(logits, dims=1)
